@@ -3,7 +3,9 @@ import streamlit as st
 
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
-        return 1, 20
+        # EDITED: was 1, 20 — Easy range should be 1 to 22
+        # return 1, 20
+        return 1, 20 #it is supposed to be 20 not 22
     if difficulty == "Normal":
         return 1, 100
     if difficulty == "Hard":
@@ -33,18 +35,31 @@ def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
 
+    # EDITED: emojis were swapped and TypeError block had messages backwards
+    # try:
+    #     if guess > secret:
+    #         return "Too High", "📈 Go LOWER!"
+    #     else:
+    #         return "Too Low", "📉 Go HIGHER!"
+    # except TypeError:
+    #     g = str(guess)
+    #     if g == secret:
+    #         return "Win", "🎉 Correct!"
+    #     if g > secret:
+    #         return "Too High", "📈 Go HIGHER!"
+    #     return "Too Low", "📉 Go LOWER!"
     try:
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📉 Go LOWER!"
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📈 Go HIGHER!"
     except TypeError:
         g = str(guess)
         if g == secret:
             return "Win", "🎉 Correct!"
         if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+            return "Too High", "📉 Go LOWER!"
+        return "Too Low", "📈 Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -133,7 +148,9 @@ with col3:
 
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    # EDITED: was hardcoded random.randint(1, 100) — should use difficulty range
+    # st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high)
     st.success("New game started.")
     st.rerun()
 
@@ -148,6 +165,10 @@ if submit:
     st.session_state.attempts += 1
 
     ok, guess_int, err = parse_guess(raw_guess)
+
+    # EDITED: added range validation — no check existed before
+    if ok and guess_int is not None and (guess_int < low or guess_int > high):
+        ok, err = False, f"Please enter a number between {low} and {high}."
 
     if not ok:
         st.session_state.history.append(raw_guess)
