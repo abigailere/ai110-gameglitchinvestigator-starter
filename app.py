@@ -1,83 +1,84 @@
 import random
 import streamlit as st
+from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score
 
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        # EDITED: was 1, 20 — Easy range should be 1 to 22
-        # return 1, 20
-        return 1, 20 #it is supposed to be 20 not 22
-    if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
+# def get_range_for_difficulty(difficulty: str):
+#     if difficulty == "Easy":
+#         # EDITED: was 1, 20 — Easy range should be 1 to 22
+#         # return 1, 20
+#         return 1, 20 #it is supposed to be 20 not 22
+#     if difficulty == "Normal":
+#         return 1, 100
+#     if difficulty == "Hard":
+#         return 1, 50
+#     return 1, 100
 
 
-def check_guess(guess, secret):
-    if guess == secret:
-        return "Win", "🎉 Correct!"
+# def parse_guess(raw: str):
+#     if raw is None:
+#         return False, None, "Enter a guess."
 
-    # EDITED: emojis were swapped and TypeError block had messages backwards
-    # try:
-    #     if guess > secret:
-    #         return "Too High", "📈 Go LOWER!"
-    #     else:
-    #         return "Too Low", "📉 Go HIGHER!"
-    # except TypeError:
-    #     g = str(guess)
-    #     if g == secret:
-    #         return "Win", "🎉 Correct!"
-    #     if g > secret:
-    #         return "Too High", "📈 Go HIGHER!"
-    #     return "Too Low", "📉 Go LOWER!"
-    try:
-        if guess > secret:
-            return "Too High", "📉 Go LOWER!"
-        else:
-            return "Too Low", "📈 Go HIGHER!"
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📉 Go LOWER!"
-        return "Too Low", "📈 Go HIGHER!"
+#     if raw == "":
+#         return False, None, "Enter a guess."
+
+#     try:
+#         if "." in raw:
+#             value = int(float(raw))
+#         else:
+#             value = int(raw)
+#     except Exception:
+#         return False, None, "That is not a number."
+
+#     return True, value, None
 
 
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
+# def check_guess(guess, secret):
+#     if guess == secret:
+#         return "Win", "🎉 Correct!"
 
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
+#     # EDITED: emojis were swapped and TypeError block had messages backwards
+#     # try:
+#     #     if guess > secret:
+#     #         return "Too High", "📈 Go LOWER!"
+#     #     else:
+#     #         return "Too Low", "📉 Go HIGHER!"
+#     # except TypeError:
+#     #     g = str(guess)
+#     #     if g == secret:
+#     #         return "Win", "🎉 Correct!"
+#     #     if g > secret:
+#     #         return "Too High", "📈 Go HIGHER!"
+#     #     return "Too Low", "📉 Go LOWER!"
+#     try:
+#         if guess > secret:
+#             return "Too High", "📉 Go LOWER!"
+#         else:
+#             return "Too Low", "📈 Go HIGHER!"
+#     except TypeError:
+#         g = str(guess)
+#         if g == secret:
+#             return "Win", "🎉 Correct!"
+#         if g > secret:
+#             return "Too High", "📉 Go LOWER!"
+#         return "Too Low", "📈 Go HIGHER!"
 
-    if outcome == "Too Low":
-        return current_score - 5
 
-    return current_score
+# def update_score(current_score: int, outcome: str, attempt_number: int):
+#     if outcome == "Win":
+#         points = 100 - 10 * (attempt_number + 1)
+#         if points < 10:
+#             points = 10
+#         return current_score + points
+
+#     if outcome == "Too High":
+#         if attempt_number % 2 == 0:
+#             return current_score + 5
+#         return current_score - 5
+
+#     if outcome == "Too Low":
+#         return current_score - 5
+
+#     return current_score
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -119,10 +120,25 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# EDITED: no difficulty tracking existed — secret was never refreshed on mode change
+# (nothing was here before)
+if "difficulty" not in st.session_state:
+    st.session_state.difficulty = difficulty
+
+if st.session_state.difficulty != difficulty:
+    st.session_state.difficulty = difficulty
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.attempts = 1
+    st.session_state.status = "playing"
+    st.session_state.history = []
+    st.rerun()
+
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
+    # EDITED: was hardcoded "1 and 100" — should reflect the actual difficulty range
+    # f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -151,6 +167,9 @@ if new_game:
     # EDITED: was hardcoded random.randint(1, 100) — should use difficulty range
     # st.session_state.secret = random.randint(1, 100)
     st.session_state.secret = random.randint(low, high)
+    # EDITED: status and history were never reset — game stayed locked after a win/loss
+    st.session_state.status = "playing"
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -167,6 +186,7 @@ if submit:
     ok, guess_int, err = parse_guess(raw_guess)
 
     # EDITED: added range validation — no check existed before
+    # (nothing was here before)
     if ok and guess_int is not None and (guess_int < low or guess_int > high):
         ok, err = False, f"Please enter a number between {low} and {high}."
 
