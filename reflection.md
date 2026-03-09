@@ -31,7 +31,7 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 - Describe at least one test you ran (manual or using pytest)  
   and what it showed you about your code.
 - Did AI help you design or understand any tests? How?
-  I tested my code by running the running the game and inputting values that I knew were supposed to be wrong and would have been allowed before the fix. For example, I guessed numbers that were out of range to see if that guess would be accepted. For testing the new game bug, I toggled between the difficulties to check that there were different secret numbers being generated and I clicked the button several times to also check. I didn't use AI to help me generate new tests but I used it to help me understand the tests that were already written so I could understand what it meant when it failed or passed.
+  I tested my code by running the running the game and inputting values that I knew were supposed to be wrong and would have been allowed before the fix. For example, I guessed numbers that were out of range to see if that guess would be accepted. For testing the new game bug, I toggled between the difficulties to check that there were different secret numbers being generated and I clicked the button several times to also check. I used AI to help me generate a test that checks if the new generated secret number is different when new game is clicked. Also, I used it to help me understand the tests that were already written so I could understand what it meant when it failed or passed.
 ---
 
 ## 4. What did you learn about Streamlit and state?
